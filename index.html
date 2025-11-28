@@ -1,1 +1,291 @@
+<!doctype html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>صباح الخير يا سلومتي</title>
+  <style>
+    :root{
+      --accent:#ff4d6d;
+      --card-bg: rgba(255,255,255,0.9);
+      --glass: rgba(255,255,255,0.6);
+    }
+    html,body{
+      height:100%;
+      margin:0;
+      font-family: "Tajawal", "Noto Sans Arabic", system-ui, sans-serif;
+      background: linear-gradient(120deg,#ffe8f0 0%, #fff7e6 50%, #e8f7ff 100%);
+      direction: rtl;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      color:#222;
+    }
+
+    .page {
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px;
+      box-sizing:border-box;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .card{
+      width:min(980px,95%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(250,250,255,0.9));
+      box-shadow: 0 10px 30px rgba(20,20,40,0.12);
+      border-radius:18px;
+      padding:22px;
+      position:relative;
+      overflow:visible;
+      backdrop-filter: blur(6px);
+      display:grid;
+      grid-template-columns: 1fr 320px;
+      gap:18px;
+    }
+
+    .text-block{
+      padding:16px 18px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+
+    .greeting{
+      font-size:26px;
+      line-height:1.5;
+      font-weight:600;
+      color:#1b1b1b;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.6);
+      margin-bottom:12px;
+    }
+
+    .sub{
+      font-size:16px;
+      color:#333;
+      opacity:0.95;
+    }
+
+    .controls{
+      margin-top:18px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    button{
+      background:var(--accent);
+      color:white;
+      border:0;
+      padding:10px 14px;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:700;
+      box-shadow: 0 6px 18px rgba(255,77,109,0.18);
+    }
+
+    .photos {
+      position:relative;
+      height:480px;
+      border-radius:12px;
+      overflow:visible;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(240,240,255,0.4));
+      border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .photo{
+      position:absolute;
+      width:260px;
+      height:340px;
+      object-fit: cover;
+      border-radius:12px;
+      box-shadow: 0 14px 30px rgba(10,10,30,0.12);
+      transform-origin:center;
+      transition: transform 700ms cubic-bezier(.2,.9,.2,1), left 600ms, top 600ms;
+      border:6px solid var(--glass);
+    }
+
+    @media (max-width:880px){
+      .card{ grid-template-columns: 1fr; }
+      .photos{ height:380px; order: -1; margin-bottom:12px; }
+      .photo{ width:200px; height:260px; }
+    }
+
+    .hearts-container{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    .heart{
+      position:absolute;
+      font-size:22px;
+      animation: floatUp linear forwards;
+      opacity:0.95;
+      transform: translateY(0) scale(1);
+      user-select:none;
+    }
+
+    @keyframes floatUp{
+      0% { transform: translateY(0) scale(0.8); opacity:0.9; }
+      50% { opacity:1; }
+      100% { transform: translateY(-140vh) scale(1.2); opacity:0; }
+    }
+
+    .sig{
+      margin-top:14px;
+      font-size:13px;
+      color:#444;
+      opacity:0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <div class="text-block">
+        <div class="greeting">
+          صباح الخير يا سلومتي يا حبيبتي يا نن عيني و أغلى حد في عمري<br>
+          يا ست بنات الدنيا كلهم و ملكة جمال عيني، يا أغلى حد في عمري.
+        </div>
+        <div class="sub">
+          ربنا يخليكي ليا يا حبيبتي، و تجري الأيام و تصبحي في حضني.
+        </div>
+
+        <div class="controls">
+          <button id="reshuffle">Click</button>
+        </div>
+
+        <div class="sig">من عمورك حبيبك </div>
+      </div>
+
+      <div class="photos" id="photosArea">
+        <img class="photo" id="p0" src="" alt="صورة 1">
+        <img class="photo" id="p1" src="" alt="صورة 2">
+        <img class="photo" id="p2" src="" alt="صورة 3">
+      </div>
+
+      <div class="hearts-container" id="hearts"></div>
+    </div>
+  </div>
+
+  <script>
+    const images = [
+      "20251105_081451.jpg",
+      "20251105_082044.jpg",
+      "7aba894651a326221106c53ccbebd752_0.jpeg"
+    ];
+
+    const photoEls = [
+      document.getElementById("p0"),
+      document.getElementById("p1"),
+      document.getElementById("p2")
+    ];
+
+    function shuffleArray(a){
+      for(let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]] = [a[j],a[i]];
+      }
+    }
+
+    function placePhotos(){
+      const imgs = images.slice();
+      shuffleArray(imgs);
+      const area = document.getElementById('photosArea');
+      const rect = area.getBoundingClientRect();
+
+      photoEls.forEach((el,i) => {
+        el.src = imgs[i];
+        const w = el.clientWidth || 260;
+        const h = el.clientHeight || 340;
+        const pad = 12;
+        const maxLeft = Math.max(0, rect.width - w - pad);
+        const maxTop = Math.max(0, rect.height - h - pad);
+        const left = Math.round(Math.random()*maxLeft);
+        const top = Math.round(Math.random()*maxTop);
+        el.style.left = left + "px";
+        el.style.top = top + "px";
+        const rot = (Math.random()*24 - 12).toFixed(2);
+        const scale = 0.92 + Math.random()*0.16;
+        el.style.transform = `rotate(${rot}deg) scale(${scale})`;
+      });
+    }
+
+    window.addEventListener('load', () => {
+      setTimeout(placePhotos, 120);
+      startHearts();
+    });
+
+    window.addEventListener('resize', () => {
+      setTimeout(placePhotos, 120);
+    });
+
+    document.getElementById('reshuffle').addEventListener('click', () => {
+      placePhotos();
+      spawnBurstHearts(6);
+    });
+
+    const heartsContainer = document.getElementById('hearts');
+    let heartsOn = true;
+
+    function randomBetween(min,max){ return min + Math.random()*(max-min); }
+
+    function createHeart(x, y){
+      const s = document.createElement('div');
+      s.className = 'heart';
+      s.style.left = (x*100) + '%';
+      s.style.top = (y*100) + '%';
+      s.style.fontSize = (randomBetween(14,42)) + 'px';
+      s.style.color = `rgba(255, ${Math.floor(randomBetween(80,40))}, ${Math.floor(randomBetween(100,160))}, ${randomBetween(0.8,1)})`;
+      s.style.animationDuration = (randomBetween(6,12)) + 's';
+      const hearts = ['❤','💖','💕','💘','💗','❣️'];
+      s.textContent = hearts[Math.floor(Math.random()*hearts.length)];
+      heartsContainer.appendChild(s);
+      setTimeout(()=> s.remove(), (parseFloat(s.style.animationDuration)*1000)+300);
+    }
+
+    let heartInterval = null;
+
+    function startHearts(){
+      if(heartInterval) clearInterval(heartInterval);
+      heartInterval = setInterval(() => {
+        const count = Math.random() < 0.6 ? 1 : 2;
+        for(let i=0;i<count;i++){
+          const x = Math.random();
+          const y = 0.95;
+          createHeart(x, y);
+        }
+      }, 600);
+    }
+
+    function spawnBurstHearts(n=8){
+      for(let i=0;i<n;i++){
+        setTimeout(()=> {
+          const x = Math.random();
+          const y = 0.9 - Math.random()*0.08;
+          createHeart(x,y);
+        }, i*80);
+      }
+    }
+
+    photoEls.forEach(el=>{
+      el.addEventListener('click', (ev)=>{
+        const parentRect = el.parentElement.getBoundingClientRect();
+        const relX = (ev.clientX - parentRect.left) / parentRect.width;
+        const relY = (ev.clientY - parentRect.top) / parentRect.height;
+        for(let i=0;i<10;i++){
+          setTimeout(()=> createHeart(relX + (Math.random()-0.5)*0.12, relY + (Math.random()-0.2)*0.12), i*60);
+        }
+      });
+    });
+
+  </script>
+</body>
+</html>
 
